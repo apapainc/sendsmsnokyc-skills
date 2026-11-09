@@ -1,0 +1,313 @@
+openapi: 3.0.3
+info:
+  title: SMSRoute - Sovereign Outbound SMS & OTP API (No-KYC, Crypto-Native)
+  description: High-throughput Application-to-Person (A2P) outbound SMS gateway.
+    Zero-KYC onboarding, crypto-native account settlement (Bitcoin, USDT,
+    Monero, Ethereum, Solana), sub-second latency across 149 countries, and raw
+    SS7 carrier delivery receipts.
+  version: 1.0.0
+  contact:
+    name: SMSRoute Support
+    url: https://sendsmsnokyc.com
+    email: support@sendsmsnokyc.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://api.sendsmsnokyc.com/v1
+    description: Production Global Gateway
+paths:
+  /sms/send:
+    post:
+      summary: Dispatch Outbound SMS
+      description: Transmits a single or multi-part outbound SMS message to any global
+        mobile handset.
+      operationId: sendSms
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmsSendRequest"
+      responses:
+        "200":
+          description: SMS successfully queued and dispatched to mobile network operator.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmsSendResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "402":
+          $ref: "#/components/responses/402PaymentRequired"
+        "429":
+          $ref: "#/components/responses/429TooManyRequests"
+  /sms/send-batch:
+    post:
+      summary: Dispatch Batch SMS
+      description: Transmits high-throughput batch SMS messages to up to 1,000
+        recipients simultaneously.
+      operationId: sendBatchSms
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmsBatchRequest"
+      responses:
+        "200":
+          description: Batch accepted for carrier routing.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmsBatchResponse"
+  /sms/{id}:
+    get:
+      summary: Get SMS Delivery Status
+      description: Fetches the real-time carrier delivery receipt (DLR) and SS7 status
+        code for a dispatched message.
+      operationId: getSmsStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the message (e.g., msg_9f83a2c4e1b7).
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current delivery status record.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryStatusResponse"
+        "404":
+          description: Message ID not found.
+  /balance:
+    get:
+      summary: Get Account Balance
+      description: Retrieves the current account credit balance in USD and active
+        cryptocurrency deposit addresses.
+      operationId: getBalance
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Balance and wallet addresses returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+  /pricing:
+    get:
+      summary: Get Live Pricing Ledger
+      description: Retrieves real-time per-message rates, p50 delivery latencies, and
+        DLR success rates across 149 countries.
+      operationId: getPricing
+      responses:
+        "200":
+          description: 149-country pricing ledger returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PricingResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Enter your SMSRoute live API key (e.g., sr_live_...)
+  schemas:
+    SmsSendRequest:
+      type: object
+      required:
+        - to
+        - message
+      properties:
+        to:
+          type: string
+          example: "+14155552671"
+          description: Destination phone number in standard E.164 format with leading plus
+            sign.
+        from:
+          type: string
+          example: AuthAlert
+          description: Alphanumeric sender ID (up to 11 characters) or numeric sender ID.
+        message:
+          type: string
+          example: Your security verification code is 849201. Valid for 10 minutes.
+          description: Message text payload. GSM 03.38 (up to 160 chars/part) or UCS-2 (up
+            to 70 chars/part).
+    SmsSendResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message_id:
+          type: string
+          example: msg_9f83a2c4e1b7
+        to:
+          type: string
+          example: "+14155552671"
+        segments:
+          type: integer
+          example: 1
+        cost_usd:
+          type: number
+          format: float
+          example: 0.0079
+        currency:
+          type: string
+          example: USD
+        created_at:
+          type: string
+          format: date-time
+          example: 2026-11-04T18:00:00Z
+    SmsBatchRequest:
+      type: object
+      required:
+        - messages
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/SmsSendRequest"
+    SmsBatchResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: accepted
+        batch_id:
+          type: string
+          example: batch_48102847192
+        total_dispatched:
+          type: integer
+          example: 50
+        total_cost_usd:
+          type: number
+          format: float
+          example: 0.395
+    DeliveryStatusResponse:
+      type: object
+      properties:
+        message_id:
+          type: string
+          example: msg_9f83a2c4e1b7
+        status:
+          type: string
+          enum:
+            - queued
+            - dispatched
+            - delivered
+            - undelivered
+            - rejected
+          example: delivered
+        dlr_code:
+          type: string
+          example: DELIVRD
+        ss7_error_code:
+          type: string
+          example: "000"
+        latency_ms:
+          type: integer
+          example: 185
+        delivered_at:
+          type: string
+          format: date-time
+          example: 2026-11-04T18:00:01Z
+    BalanceResponse:
+      type: object
+      properties:
+        balance_usd:
+          type: number
+          format: float
+          example: 48.5
+        currency:
+          type: string
+          example: USD
+        deposit_addresses:
+          type: object
+          properties:
+            btc:
+              type: string
+              example: bc1qsamplebtcaddress...
+            usdt_trc20:
+              type: string
+              example: Tsampleusdtaddress...
+            xmr:
+              type: string
+              example: 8samplemoneroaddress...
+    PricingResponse:
+      type: object
+      properties:
+        total_countries:
+          type: integer
+          example: 149
+        as_of:
+          type: string
+          example: 2026-11-04
+        rates:
+          type: array
+          items:
+            type: object
+            properties:
+              country:
+                type: string
+              iso2:
+                type: string
+              dial_code:
+                type: string
+              rate_usd:
+                type: number
+              latency_p50_ms:
+                type: integer
+              dlr_success_percent:
+                type: number
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error_code:
+          type: string
+          example: INVALID_RECIPIENT
+        message:
+          type: string
+          example: Recipient number must be formatted in E.164 notation.
+  responses:
+    400BadRequest:
+      description: Invalid recipient format or missing required payload fields.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    401Unauthorized:
+      description: Missing, invalid, or expired API key bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    402PaymentRequired:
+      description: Account credit balance insufficient to cover destination rate.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    429TooManyRequests:
+      description: Rate limit exceeded (100 req/sec limit). Back off and retry.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
