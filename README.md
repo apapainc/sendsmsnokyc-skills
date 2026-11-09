@@ -7,16 +7,16 @@ Official AI Agent Skills for **[SendSMSNoKYC (SMSRoute)](https://sendsmsnokyc.co
 Install all skills into your AI coding agent (Claude Code, Cursor, Antigravity, Codex, Windsurf, Cline, etc.):
 
 ```bash
-npx skills add FridayCandour/sendsmsnokyc-skills --all
+npx skills add apapainc/sendsmsnokyc-skills --all
 ```
 
 Or install a specific skill:
 
 ```bash
-npx skills add FridayCandour/sendsmsnokyc-skills --skill sendsmsnokyc-api
-npx skills add FridayCandour/sendsmsnokyc-skills --skill smsroute-send-sms
-npx skills add FridayCandour/sendsmsnokyc-skills --skill smsroute-smpp-gateway
-npx skills add FridayCandour/sendsmsnokyc-skills --skill smsroute-hlr-route-testing
+npx skills add apapainc/sendsmsnokyc-skills --skill sendsmsnokyc-api
+npx skills add apapainc/sendsmsnokyc-skills --skill smsroute-send-sms
+npx skills add apapainc/sendsmsnokyc-skills --skill smsroute-smpp-gateway
+npx skills add apapainc/sendsmsnokyc-skills --skill smsroute-hlr-route-testing
 ```
 
 ## Included Skills
