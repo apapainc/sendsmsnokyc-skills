@@ -1,11 +1,11 @@
 ---
 name: sendsmsnokyc-api
-description: "Complete integration guide and reference for the SendSMSNoKYC / SMSRoute API (https://api.sendsmsnokyc.com) and SMPP v3.4 over TLS gateway (ssmpp://smpp.sendsmsnokyc.com:2775). Covers outbound single and bulk A2P/OTP/transactional SMS dispatch, message cost & encoding validation (GSM-7 vs UCS-2), real-time delivery status (DLR) polling and webhooks, HLR number lookup (single & bulk), live multi-carrier route probe testing (/test/run, /test/results, /test/apply-route), campaign management, account balance, and country pricing. Use this skill whenever a user wants to send SMS without KYC, integrate the sendsmsnokyc.com or SMSRoute REST API or SMPP gateway, validate phone numbers via HLR, or run live carrier route quality tests."
+description: "Complete integration guide and reference for the SendSMSNoKYC / SMSRoute API (https://api.sendsmsnokyc.com) and SMPP v3.4 over TLS gateway (ssmpp://smpp.sendsmsnokyc.com:2775). Covers outbound single and bulk A2P/OTP/transactional SMS dispatch, zero-KYC Custom Sender IDs (alphanumeric, numeric, dynamic @NUMBER@ macros, and route types sid_open/sid_fixed/shortcode/sim), message cost & encoding validation (GSM-7 vs UCS-2), real-time delivery status (DLR) polling and webhooks, HLR number lookup (single & bulk), live multi-carrier route probe testing (/test/run, /test/results, /test/apply-route), campaign management, account balance, and country pricing. Use this skill whenever a user wants to send SMS without KYC, configure custom Sender IDs, integrate the sendsmsnokyc.com or SMSRoute REST API or SMPP gateway, validate phone numbers via HLR, or run live carrier route quality tests."
 metadata:
   author: SMSRoute
-  version: 1.0.0
+  version: 1.1.0
   category: Messaging & Telecommunications
-  tags: sms, otp, 2fa, a2p, sendsmsnokyc, smsroute, no-kyc, crypto, smpp, hlr, bulk-sms, delivery-receipts, webhooks
+  tags: sms, otp, 2fa, a2p, sender-id, custom-sender-id, sendsmsnokyc, smsroute, no-kyc, crypto, smpp, hlr, bulk-sms, delivery-receipts, webhooks
 ---
 
 # SendSMSNoKYC / SMSRoute API Skill
@@ -283,9 +283,24 @@ When `callback_url` is provided on `/sms/send` or `/sms/send/bulk`, SMSRoute sen
 
 ---
 
-### 9. SMPP v3.4 over TLS Quick Reference
+### 9. Custom Sender ID Rules & Route Types (`sender_id` / `source_addr`)
+- **Zero-KYC Dynamic Configuration:** Custom Sender IDs are set per-message via the `sender_id` body parameter in REST (`/sms/send`, `/sms/send/bulk`, `/campaigns`, `/test/run`), `source_addr` in SMPP (`source_addr_ton: 5`, `source_addr_npi: 0`), or on the **Send SMS / Campaign** composer in the web dashboard. Default fallback is `"vortex"`.
+- **Alphanumeric Format:** **3 to 11 ASCII alphanumeric characters** (`A–Z`, `a–z`, `0–9`), must include at least one letter. Avoid spaces and punctuation (`"AuthAlert"`, `"BrandVerify"`, `"InfoSMS"`).
+- **Dynamic Numeric Macros:** On SIM/numeric routes, use `@NUMBER5@` or `38@NUMBER3@` to randomize numeric originators per message.
+- **Route Types (`GET /prices` `type` field):**
+  - `sid_open`: Preserves your custom alphanumeric `sender_id` dynamically with zero pre-registration.
+  - `sid_fixed`: Uses a pre-registered fixed sender identity for strict national carrier firewalls.
+  - `shortcode`: Delivers via a high-trust 4–6 digit numeric shortcode (e.g. US/CA).
+  - `sim`: Delivers via real SIM originators (`+...`), replacing custom alphanumeric SIDs.
+- *(See the dedicated `smsroute-custom-sender-id` skill for full Custom Sender ID examples, SMPP TON/NPI tables, and carrier rewrite troubleshooting.)*
+
+---
+
+### 10. SMPP v3.4 over TLS Quick Reference
 For high-throughput persistent telecom binds:
 - **URL:** `ssmpp://smpp.sendsmsnokyc.com:2775` (TLS from byte 0; never use plaintext `smpp://`).
 - **TLS SNI:** Required (`servername: 'smpp.sendsmsnokyc.com'` in Node.js, `server_hostname='smpp.sendsmsnokyc.com'` in Python).
 - **Bind Event:** In Node.js `smpp`, call `session.bind_transceiver(...)` inside `session.on('secureConnect', ...)`, **never** on `'connect'`.
+- **Custom Alphanumeric Sender ID:** Pass `source_addr: 'YourBrand'` (max 11 chars), `source_addr_ton: 5`, `source_addr_npi: 0`.
 - **DLRs:** Acknowledge every `deliver_sm` PDU with `deliver_sm_resp`.
+

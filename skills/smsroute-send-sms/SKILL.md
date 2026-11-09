@@ -27,8 +27,11 @@ Use this skill whenever an application or script needs to:
    - **GSM 7-bit (`GSM_7BIT`):** Up to **160 characters** for a single SMS, or **153 characters per part** for multi-part concatenated messages (up to 6 parts = 918 characters).
    - **Unicode (`UCS2`):** Triggered automatically if the message contains non-GSM characters (e.g., emojis, Cyrillic, Arabic, CJK, or accented characters outside standard GSM-7 like `ä`, `ö`, `å`). Up to **70 characters** for a single SMS, or **67 characters per part** for multi-part messages (up to 6 parts = 402 characters).
    - Always call `POST /sms/validate` if you want to preview the exact `parts`, `encoding`, and `cost.total` before dispatching.
-3. **Sender ID (`sender_id`):**
-   - Alphanumeric Sender IDs can be up to **11 characters** (e.g., `"AuthAlert"`, `"vortex"`).
+3. **Custom Sender ID (`sender_id`):**
+   - Set per-message in the request payload (defaults to `"vortex"` if omitted; no pre-registration or KYC required on `sid_open` routes).
+   - **Alphanumeric Sender IDs:** **3–11 characters** (`A–Z`, `a–z`, `0–9`, at least one letter; avoid spaces and symbols, e.g. `"AuthAlert"`, `"BrandVerify"`, `"InfoSMS"`).
+   - **Dynamic Numeric Macros:** Use `@NUMBER5@` or `38@NUMBER3@` on SIM/numeric routes to randomize numeric originators per message.
+   - **Route Types (`GET /prices`):** `sid_open` preserves your custom alphanumeric `sender_id`; `sid_fixed` uses a pre-registered sender identity; `shortcode` uses a 4–6 digit numeric code; `sim` uses real mobile SIM numbers. See the `smsroute-custom-sender-id` skill for full details.
 4. **Route Selection (`marker`):**
    - Omit `marker` to use your configured per-country default route or SMSRoute's automatic best route.
    - Pass `marker: "1"`, `"2"`, `"3"`, or `"4"` to explicitly route through **Route 1**, **Route 2**, **Route 3**, or **Route 4**.
@@ -140,3 +143,4 @@ For large-scale or scheduled broadcasts with macro expansion:
   - `PUT /campaigns/{campaignId}/cancel`
   - `POST /campaigns/{campaignId}/clone`
 - **Export Campaign Report:** `GET /campaigns/{campaignId}/export?format=csv`
+

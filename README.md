@@ -1,35 +1,26 @@
 # SendSMSNoKYC / SMSRoute Agent Skills
 
-Official AI Agent Skills for **[SendSMSNoKYC (SMSRoute)](https://sendsmsnokyc.com)** — the privacy-first, zero-KYC Application-to-Person (A2P) outbound SMS, OTP, HLR Lookup, and SMPP v3.4 over TLS gateway (`https://api.sendsmsnokyc.com`).
+Official Agent Skills for integrating with **SendSMSNoKYC (SMSRoute)** (`https://sendsmsnokyc.com` / `https://api.sendsmsnokyc.com`), the privacy-first, zero-KYC global A2P SMS, OTP, HLR Lookup, and SMPP v3.4 over TLS platform.
 
-## Install via `skills.sh`
-
-Install all skills into your AI coding agent (Claude Code, Cursor, Antigravity, Codex, Windsurf, Cline, etc.):
+## Install via skills.sh
 
 ```bash
-npx skills add apapainc/sendsmsnokyc-skills --all
-```
-
-Or install a specific skill:
-
-```bash
-npx skills add apapainc/sendsmsnokyc-skills --skill sendsmsnokyc-api
-npx skills add apapainc/sendsmsnokyc-skills --skill smsroute-send-sms
-npx skills add apapainc/sendsmsnokyc-skills --skill smsroute-smpp-gateway
-npx skills add apapainc/sendsmsnokyc-skills --skill smsroute-hlr-route-testing
+npx skills add apapainc/sendsmsnokyc-skills
 ```
 
 ## Included Skills
 
 | Skill | Description |
 | :--- | :--- |
-| **`sendsmsnokyc-api`** | Complete end-to-end reference for the `https://api.sendsmsnokyc.com` REST API & SMPP TLS gateway (`ssmpp://smpp.sendsmsnokyc.com:2775`). |
-| **`smsroute-send-sms`** | Send single, bulk, and campaign SMS messages globally, validate GSM-7 vs UCS-2 segments & cost (`/sms/validate`), and handle DLR webhooks. |
-| **`smsroute-smpp-gateway`** | Connect and bind to `ssmpp://smpp.sendsmsnokyc.com:2775` over TLS with SNI in Node.js (`smpp`) and Python (`smpplib`). |
-| **`smsroute-hlr-route-testing`** | Perform real-time HLR carrier/portability lookups (`/hlr/get/lookup`) and automated multi-carrier route probe tests (`/test/run`, `/test/apply-route`). |
+| [`sendsmsnokyc-api`](./skills/sendsmsnokyc-api/SKILL.md) | Complete REST API & SMPP v3.4 reference for single/bulk SMS, Custom Sender IDs, DLR webhooks, HLR lookup, live carrier route probe testing, balance, and country pricing. |
+| [`smsroute-send-sms`](./skills/smsroute-send-sms/SKILL.md) | Focused guide and TypeScript/Python templates for sending OTP, 2FA, transactional, bulk, and campaign SMS with GSM-7 vs UCS-2 segment validation. |
+| [`smsroute-custom-sender-id`](./skills/smsroute-custom-sender-id/SKILL.md) | Complete guide to Custom Sender IDs (`sender_id` / `source_addr`), 11-char alphanumeric formatting rules, route types (`sid_open`, `sid_fixed`, `shortcode`, `sim`), dynamic `@NUMBER@` macros, and live Sender ID preservation testing. |
+| [`smsroute-smpp-gateway`](./skills/smsroute-smpp-gateway/SKILL.md) | Production SMPP v3.4 over TLS (`ssmpp://smpp.sendsmsnokyc.com:2775`) guide for Node.js (`smpp`) and Python (`smpplib`) with TLS SNI and `secureConnect` handling. |
+| [`smsroute-hlr-route-testing`](./skills/smsroute-hlr-route-testing/SKILL.md) | HLR number reachability & MCC/MNC portability lookups (`/hlr/get/lookup`) and live multi-carrier route probe testing (`/test/run`, `/test/apply-route`). |
 
 ## Links
 
 - **Platform:** [https://sendsmsnokyc.com](https://sendsmsnokyc.com)
-- **API Documentation:** [https://sendsmsnokyc.com/api-docs](https://sendsmsnokyc.com/api-docs)
-- **OpenAPI 3.0 Spec:** [`openapi.yaml`](./openapi.yaml)
+- **REST API Base URL:** `https://api.sendsmsnokyc.com`
+- **SMPP v3.4 over TLS:** `ssmpp://smpp.sendsmsnokyc.com:2775`
+- **Documentation:** [https://sendsmsnokyc.com/api-docs](https://sendsmsnokyc.com/api-docs)
